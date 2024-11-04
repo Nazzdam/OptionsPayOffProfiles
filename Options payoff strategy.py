@@ -2,19 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# these are the deatils of the options
-strike_Prices=np.array([8800,9000,9200,9400,9600,9800,10000])
-premiums=np.array([])
-spot_Prices=np.array({8700,8800,9000,9200,9400,9600,9800,10000,101000})
+#Get user input
+def options_user_input(prompt):
+    return np.array(list(map(float,input(prompt).split)))
 
-#Define the options
-def option_payoff(strike,premium,spot,option_type):
-    if option_type=="call":
-        #Call option intrinsic value
-        return np.maximum(spot-strike,0)-premium
-    elif option_type=="put":
-        #Put intrisic value
-        return np.maximum(strike-spot,0)-premium
-    
-#Generate a payoff diagram
-   
+#get user input for the details of the opton
+strikePrices=options_user_input("Enter the stike prices sperated by spaces")
+spotPrices=options_user_input("Enter the spot prices as a range sperated by spaces")
+premiums=options_user_input("Enter the premiums seperated by spaces")
+
+#Define the type of option and it's payyoff diagram
