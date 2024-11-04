@@ -12,3 +12,32 @@ spotPrices=options_user_input("Enter the spot prices as a range sperated by spac
 premiums=options_user_input("Enter the premiums seperated by spaces")
 
 #Define the type of option and it's payyoff diagram
+def option_Payoff(strike,premium,spot,option_type):
+    if option_type=="Call":
+        #intrinsic vlaue of a call
+        np.maximum(spot-strike,0)-premium
+    elif option_type=="Put":
+        #instrinsic value of a put
+        np.maximum(strike-spot,0)-premium
+
+#Generate an options payoff diagram
+def option_ploted_diagram(strike, premium, spot, option_type="Call"):
+    plt.figures(figsize=(10,6))
+    
+    for i in range(len(strikePrices)):
+        strike=strikePrices[i]
+        premium=premiums[i]
+        
+        payoff=option_Payoff(strike,premium,spot,option_type)
+        plt.plot(spotPrices, payoff,label=f'{option_type} Strike:{strike}')
+        
+        plt.title(f'{option_type} Option Payoff Diagram')
+        plt.xlabel('Spot price')
+        plt.ylabel('Payoff')
+        plt.legend()
+        plt.grid(True)
+        plt.show
+#Promt the user to enter the option type
+option_type=input("Enter the option type(Call or Put):")       
+#once we have user input, compute the payoff diagram
+option_ploted_diagram(strikePrices,premiums,spotPrices,option_type) 
