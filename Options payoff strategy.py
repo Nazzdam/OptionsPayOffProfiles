@@ -15,10 +15,10 @@ premiums=options_user_input("Enter the premiums seperated by spaces")
 def option_Payoff(strike,premium,spot,option_type):
     if option_type=="Call":
         #intrinsic vlaue of a call
-        np.maximum(spot-strike,0)-premium
+        np.maximum(0,spot-strike)-premium
     elif option_type=="Put":
         #instrinsic value of a put
-        np.maximum(strike-spot,0)-premium
+        np.maximum(0,strike-spot)-premium
 
 #Generate an options payoff diagram
 def option_ploted_diagram(strike, premium, spot, option_type="Call"):
