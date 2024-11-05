@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #Get user input
 def options_user_input(prompt):
-    return np.array(list(map(float,input(prompt).split)))
+   return np.array(list(map(float, input(prompt).split())))
 
 #get user input for the details of the opton
 strikePrices=options_user_input("Enter the stike prices sperated by spaces")
@@ -22,7 +22,7 @@ def option_Payoff(strike,premium,spot,option_type):
 
 #Generate an options payoff diagram
 def option_ploted_diagram(strike, premium, spot, option_type="Call"):
-    plt.figures(figsize=(10,6))
+    plt.figure(figsize=(10,6))
     
     for i in range(len(strikePrices)):
         strike=strikePrices[i]
