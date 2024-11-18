@@ -19,9 +19,9 @@ def option_Payoff(strike,premium,spot,option_type):
     elif option_type=="Put":
         #instrinsic value of a put
         np.maximum(0,strike-spot)-premium
-    elif option_type=="Short Call"    :
+    elif option_type=="Short_Call"    :
         np.maximum(0,spot-strike)+premium
-    elif option_type=="Short Put":
+    elif option_type=="Short_Put":
         np.maximum(0,strike-spot)+premium
 
 #Generate an options payoff diagram
@@ -42,6 +42,6 @@ def option_ploted_diagram(strike, premium, spot, option_type="Call"):
         plt.grid(True)
         plt.show
 #Promt the user to enter the option type
-option_type=input("Enter the option type(Call or Put):")       
+option_type=input("Enter the option type(Call or Put or Short_Call or Short_Put):")       
 #once we have user input, compute the payoff diagram
 option_ploted_diagram(strikePrices,premiums,spotPrices,option_type) 
