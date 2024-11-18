@@ -1,47 +1,73 @@
-# This programm is used to calculate the options payoff diagram of 7 different options.
 import numpy as np
 import matplotlib.pyplot as plt
 
-#Get user input
-def options_user_input(prompt):
-   return np.array(list(map(float, input(prompt).split())))
+def get_user_input(prompt):
+    """
+    Get user input as a list of floating-point numbers.
+    """
+    try:
+        return np.array(list(map(float, input(prompt).split())))
+    except ValueError:
+        print("Invalid input. Please enter numbers separated by spaces.")
+        return get_user_input(prompt)
 
-#get user input for the details of the opton
-strikePrices=options_user_input("Enter the stike prices sperated by spaces")
-spotPrices=options_user_input("Enter the spot prices as a range sperated by spaces")
-premiums=options_user_input("Enter the premiums seperated by spaces")
+def option_payoff(strike, premium, spot, option_type):
+    """
+    Calculate the payoff for various option types.
+    """
+    if option_type == "Call":
+        return np.maximum(0, spot - strike) - premium
+    elif option_type == "Put":
+        return np.maximum(0, strike - spot) - premium
+    elif option_type == "Short_Call":
+        return -(np.maximum(0, spot - strike)) + premium
+    elif option_type == "Short_Put":
+        return -(np.maximum(0, strike - spot)) + premium
+    else:
+        raise ValueError(f"Unknown option type: {option_type}")
 
-#Define the type of option and it's payyoff diagram
-def option_Payoff(strike,premium,spot,option_type):
-    if option_type=="Call":
-        #intrinsic vlaue of a call
-        np.maximum(0,spot-strike)-premium
-    elif option_type=="Put":
-        #instrinsic value of a put
-        np.maximum(0,strike-spot)-premium
-    elif option_type=="Short_Call"    :
-        np.maximum(0,spot-strike)+premium
-    elif option_type=="Short_Put":
-        np.maximum(0,strike-spot)+premium
+def plot_option_diagram(strike_prices, premiums, spot_prices, option_type):
+    """
+    Generate and plot the payoff diagram for options.
+    """
+    plt.figure(figsize=(10, 6))
+    for strike, premium in zip(strike_prices, premiums):
+        payoff = option_payoff(strike, premium, spot_prices, option_type)
+        plt.plot(spot_prices, payoff, label=f'{option_type} (Strike: {strike})')
 
-#Generate an options payoff diagram
-def option_ploted_diagram(strike, premium, spot, option_type="Call"):
-    plt.figure(figsize=(10,6))
-    
-    for i in range(len(strikePrices)):
-        strike=strikePrices[i]
-        premium=premiums[i]
-        
-        payoff=option_Payoff(strike,premium,spot,option_type)
-        plt.plot(spotPrices, payoff,label=f'{option_type} Strike:{strike}')
-        
-        plt.title(f'{option_type} Option Payoff Diagram')
-        plt.xlabel('Spot price')
-        plt.ylabel('Payoff')
-        plt.legend()
-        plt.grid(True)
-        plt.show
-#Promt the user to enter the option type
-option_type=input("Enter the option type(Call or Put or Short_Call or Short_Put):")       
-#once we have user input, compute the payoff diagram
-option_ploted_diagram(strikePrices,premiums,spotPrices,option_type) 
+    plt.title(f'{option_type} Option Payoff Diagram')
+    plt.xlabel('Spot Price')
+    plt.ylabel('Payoff')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Main Program
+if __name__ == "__main__":
+    print("Options Payoff Calculator")
+
+    # Get user inputs
+    strike_prices = get_user_input("Enter the strike prices separated by spaces: ")
+    premiums = get_user_input("Enter the premiums separated by spaces: ")
+    spot_range = get_user_input("Enter the spot price range (start, end, step): ")
+
+    # Generate the spot prices array
+    try:
+        spot_prices = np.arange(*spot_range)
+    except ValueError:
+        print("Invalid spot price range. Please provide start, end, and step values.")
+        exit()
+
+    # Validate input lengths
+    if len(strike_prices) != len(premiums):
+        print("Error: Strike prices and premiums must have the same number of elements.")
+        exit()
+
+    # Get the option type
+    option_type = input("Enter the option type (Call, Put, Short_Call, Short_Put): ").strip()
+    if option_type not in {"Call", "Put", "Short_Call", "Short_Put"}:
+        print(f"Invalid option type: {option_type}")
+        exit()
+
+    # Plot the option diagram
+    plot_option_diagram(strike_prices, premiums, spot_prices, option_type)
