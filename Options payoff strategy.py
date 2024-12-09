@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from _tkinter import Tk,Label, Entry, Button, OptionMenu, StringVar, Scale, Horizontal, Filedialog, messagebox
+from tkinter import Tk,Label, Entry, Button, OptionMenu, StringVar, Scale, HORIZONTAL, filedialog, messagebox
 
 def calculate_and_plot(save=False):
     """
@@ -78,17 +78,17 @@ OptionMenu(root,option_type_var, "Call", "Put", "Short_Call", "Short_Put").grid(
 
 #The sliders for the spot price ranges
 Label(root, text="Spot price start:").grid(row=3, column=0, sticky="w", padx=10, pady=5)
-Spot_start_Slider=Scale(root,from_=0, to=200, orient=Horizontal, length=300)
+Spot_start_Slider=Scale(root,from_=0, to=200, orient=HORIZONTAL, length=300)
 Spot_start_Slider.set(50)
 Spot_start_Slider.grid(row=3, column=1, padx=10, pady=5)
 
 Label(root, text="Spot price End:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
-Spot_end_slider=Scale(root, from_=0, to=200, orient=Horizontal,length=300)
+Spot_end_slider=Scale(root, from_=0, to=200, orient=HORIZONTAL,length=300)
 Spot_end_slider.set(150)
 Spot_end_slider.grid(row=4, column=1, padx=10, pady=5)
 
 Label(root,text="Spot price step:").grid(row=5, column=0, padx=10, pady=5)
-spot_step_slider=Scale(root, from_=1, to=20, oreint=Horizontal, length=300)
+spot_step_slider=Scale(root, from_=1, to=20, orient=HORIZONTAL, length=300)
 spot_step_slider.set(5)
 spot_step_slider.grid(row=5, column=1, padx=10, pady=5)
 
