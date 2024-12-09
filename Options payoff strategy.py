@@ -33,7 +33,7 @@ def calculate_and_plot(save=False):
         plt.grid(True)
         
         if save:
-            file_path=Filedialog.asksaveasfilename(defaultextension=".png",filetypes=[("PNG Files","*.png"), ("All Files", "*.*")], title="Save Payoff Diagram")
+            file_path=filedialog.asksaveasfilename(defaultextension=".png",filetypes=[("PNG Files","*.png"), ("All Files", "*.*")], title="Save Payoff Diagram")
             if file_path:
                 plt.savefig(file_path)
                 messagebox.showinfo("Success", f"Plot saved as {file_path}")
