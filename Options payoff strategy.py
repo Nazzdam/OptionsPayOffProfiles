@@ -8,11 +8,11 @@ def calculate_and_plot(save=False):
     """
    
     try:
-        strike_prices_entry=np.array(list(map(float,strike_prices_entry.get().split())))
+        strike_prices_entry=np.array(list(map(float,strike_prices_entry.get().split()))) #find a way to make this public
         premiums_Entry=np.array(list(map(float,premiums_Entry.get().split())))
         
         if len(strike_prices_entry) !=len(premiums_Entry):
-            raise ValueError("Strike prices and premiums must have the saem number of entries")
+            raise ValueError("Strike prices and premiums must have the same number of entries.")
         
         spot_start_slider=spot_start_slider.get()
         spot_end_slider=spot_end_slider.get()
