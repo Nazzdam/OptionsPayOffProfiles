@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import Tk,Label, Entry, Button, OptionMenu, StringVar, Scale, HORIZONTAL, filedialog, messagebox
+from numpy import exp,log,sqrt
+from scipy.stats import norm
 
 def calculate_and_plot(save=False):
     """
@@ -56,8 +58,23 @@ def option_Payoff(strike,premium,spot,option_type):
     elif option_type=="Short Put":
         return -(np.maximum(0,strike-spot))+premium
     else:
-        raise ValueError(f"Unkown Option type:{option_type}")            
+        raise ValueError(f"Unkown Option type:{option_type}")        
+        
+def Black_Scholes_price(X,S,T,r,Sigma,option_type):
+    """
+    I wannt to add this Black Scholes pricing function later
+    """
+    if option_type=="Call":
+        d1=(log(S/X)+(r+0.5*Sigma**2)*T)/(Sigma*sqrt(T))
+        d2=d1-Sigma(sqrt(T))
+        price=S*norm.cdf(d1)-X*exp(-r*T)*norm.cdf(d2)
+        return price
+    elif option_type=="Put":
+        d1=(log(S/X)+(r+0.5*Sigma**2)*T)/(Sigma*sqrt(T))
+        d2=d1-Sigma(sqrt(T))
+        price=X*exp(-r&T)*norm.cdf(-d2)-S.norm.cdf(-d1)
     
+       
 #Create the application window
 root=Tk()   
 root.title("Options payoff diagram")
