@@ -12,6 +12,9 @@ def calculate_and_plot(save=False):
     try:
         strike_prices_entry=np.array(list(map(float,strike_prices_entry.get().split()))) #find a way to make this public
         premiums_Entry=np.array(list(map(float,premiums_Entry.get().split())))
+        interest_rate=0.5  # Placeholder for interest rate, can be made user input later
+        sigma=0.2  # Placeholder for interest rate and volatility, can be made user inputs later
+        
         
         if len(strike_prices_entry) !=len(premiums_Entry):
             raise ValueError("Strike prices and premiums must have the same number of entries.")
@@ -77,7 +80,7 @@ def Black_Scholes_price(X,S,T,r,Sigma,option_type):
        
 #Create the application window
 root=Tk()   
-root.title("Options payoff diagram")
+root.title("Options dashboard")
 
 #Create labels and inputs
 Label(root,text="Strike prices (space-seperated):").grid(row=0, column=0, sticky="w", padx=10, pady=5)
