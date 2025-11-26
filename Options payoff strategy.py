@@ -1,132 +1,142 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from tkinter import Tk,Label, Entry, Button, OptionMenu, StringVar, Scale, HORIZONTAL, filedialog, messagebox
-from numpy import exp,log,sqrt
+from tkinter import Tk, Label, Entry, Button, OptionMenu, StringVar, Scale, HORIZONTAL, filedialog, messagebox
+from numpy import exp, log, sqrt
 from scipy.stats import norm
 
 def calculate_and_plot(save=False):
     """
     Collect the user input, calculate the payoffs, plot the payoff diagram.
     """
-   
     try:
-        strike_prices_entry=np.array(list(map(float,strike_prices_entry.get().split()))) #find a way to make this public
-        premiums_Entry=np.array(list(map(float,premiums_Entry.get().split())))
-        interest_rate_entry=0.5  # Placeholder for interest rate, can be made user input later
-        Volatility=0.2  # Placeholder for interest rate and volatility, can be made user inputs later
+        strike_prices = np.array(list(map(float, strike_prices_entry.get().split())))
+        premiums = np.array(list(map(float, premiums_entry.get().split())))
         
-        
-        if len(strike_prices_entry) !=len(premiums_Entry):
+        if len(strike_prices) != len(premiums):
             raise ValueError("Strike prices and premiums must have the same number of entries.")
         
-        spot_start_slider=spot_start_slider.get()
-        spot_end_slider=spot_end_slider.get()
-        spot_step_slider=spot_step_slider.get()
+        spot_start = Spot_start_Slider.get()
+        spot_end = Spot_end_slider.get()
+        spot_step = spot_step_slider.get()
         
-        spot_prices=np.arrange(spot_start_slider,spot_end_slider,spot_step_slider)
-        option_type_var=option_type_var.get()
+        if spot_start >= spot_end:
+            raise ValueError("Spot start must be less than spot end.")
         
-        #Generate the payoff diagram
-        plt.figure(figsize=(10,6))
-        for strike,premium in zip(strike_prices_entry,premiums_Entry):
-            payoff=option_type_var(strike,premium,spot_prices,option_type_var)
-            plt.plot(spot_prices,payoff,Label=f'{option_type_var} (Strike:{strike})')
-            
-        plt.title(f'{option_type_var} Option payoff diagram')    
-        plt.xlabel('Spot price')
+        spot_prices = np.arange(spot_start, spot_end, spot_step)
+        option_type = option_type_var.get()
+        
+        # Generate the payoff diagram
+        plt.figure(figsize=(10, 6))
+        for strike, premium in zip(strike_prices, premiums):
+            payoff = option_Payoff(strike, premium, spot_prices, option_type)
+            plt.plot(spot_prices, payoff, label=f'{option_type} (Strike:{strike})')
+        
+        plt.title(f'{option_type} Option Payoff Diagram')
+        plt.xlabel('Spot Price')
         plt.ylabel('Payoff')
+        plt.legend()
         plt.grid(True)
         
         if save:
-            file_path=filedialog.asksaveasfilename(defaultextension=".png",filetypes=[("PNG Files","*.png"), ("All Files", "*.*")], title="Save Payoff Diagram")
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".png",
+                filetypes=[("PNG Files", "*.png"), ("All Files", "*.*")],
+                title="Save Payoff Diagram"
+            )
             if file_path:
                 plt.savefig(file_path)
                 messagebox.showinfo("Success", f"Plot saved as {file_path}")
-            plt.close()    
+            plt.close()
         else:
             plt.show()
     except Exception as e:
-        messagebox.showerror("Error",f"An error occurred:{e}")
-        
-def option_Payoff(strike,premium,spot,option_type):
+        messagebox.showerror("Error", f"An error occurred: {e}")
+
+def option_Payoff(strike, premium, spot, option_type):
     """
     Calculate the payoff for various option types.
     """
-    if option_type=="Call":
-        return np.maximum(0,spot-strike )-premium
-    elif option_type=="Put":
-        return np.maximum(strike-spot)-premium
-    elif option_type=="Short Call":
-        return -(np.maximum(0,spot-strike))+premium
-    elif option_type=="Short Put":
-        return -(np.maximum(0,strike-spot))+premium
+    if option_type == "Call":
+        return np.maximum(0, spot - strike) - premium
+    elif option_type == "Put":
+        return np.maximum(0, strike - spot) - premium
+    elif option_type == "Short Call":
+        return -(np.maximum(0, spot - strike)) + premium
+    elif option_type == "Short Put":
+        return -(np.maximum(0, strike - spot)) + premium
     else:
-        raise ValueError(f"Unkown Option type:{option_type}")        
-        
-def Black_Scholes_price(X,S,T,r,Sigma,option_type):
-    """
-    I wannt to add this Black Scholes pricing function later
-    """
-    if option_type=="Call":
-        d1=(log(S/X)+(r+0.5*Sigma**2)*T)/(Sigma*sqrt(T))
-        d2=d1-Sigma(sqrt(T))
-        price=S*norm.cdf(d1)-X*exp(-r*T)*norm.cdf(d2)
-        return price
-    elif option_type=="Put":
-        d1=(log(S/X)+(r+0.5*Sigma**2)*T)/(Sigma*sqrt(T))
-        d2=d1-Sigma(sqrt(T))
-        price=X*exp(-r&T)*norm.cdf(-d2)-S.norm.cdf(-d1)
-    
-       
-#Create the application window
-root=Tk()   
-root.title("Options dashboard")
+        raise ValueError(f"Unknown Option type: {option_type}")
 
-#Create labels and inputs
-Label(root,text="Strike prices (space-seperated):").grid(row=0, column=0, sticky="w", padx=10, pady=5)
-strike_prices_entry=Entry(root,width=40)
+def Black_Scholes_price(X, S, T, r, Sigma, option_type):
+    """
+    Calculate option price using Black Scholes formula.
+    X: Strike price
+    S: Spot price
+    T: Time to maturity
+    r: Risk-free rate
+    Sigma: Volatility
+    """
+    d1 = (log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * sqrt(T))
+    d2 = d1 - Sigma * sqrt(T)
+    
+    if option_type == "Call":
+        price = S * norm.cdf(d1) - X * exp(-r * T) * norm.cdf(d2)
+        return price
+    elif option_type == "Put":
+        price = X * exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        return price
+    else:
+        raise ValueError(f"Unknown Option type: {option_type}")
+
+# Create the application window
+root = Tk()
+root.title("Options Dashboard")
+
+# Create labels and inputs
+Label(root, text="Strike Prices (space-separated):").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+strike_prices_entry = Entry(root, width=40)
 strike_prices_entry.grid(row=0, column=1, padx=10, pady=5)
 
-Label(root,text="Premiums (space-seperated):").grid(row=1, column=0, sticky="w", padx=10, pady=5)
-premiums_Entry=Entry(root,width=40)
-premiums_Entry.grid(row=1, column=1, padx=10, pady=5)
+Label(root, text="Premiums (space-separated):").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+premiums_entry = Entry(root, width=40)
+premiums_entry.grid(row=1, column=1, padx=10, pady=5)
 
-Label(root, text="Option Type (space-seperated):").grid(row=2, column=0, sticky="w", padx=10, pady=5)
-option_type_var=StringVar(root)
-option_type_var.set("Call")# This is the default option type
-OptionMenu(root,option_type_var, "Call", "Put", "Short_Call", "Short_Put").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+Label(root, text="Option Type:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+option_type_var = StringVar(root)
+option_type_var.set("Call")
+OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=2, column=1, sticky="w", padx=10, pady=5)
 
-Label(root,text="Interest Rate (%):").grid(row=2, column=1, sticky="w", padx=10, pady=5)
-interest_rate_entry=Entry(root,width=20)
-interest_rate_entry.grid(row=2, column=1, padx=10, pady=5)
+Label(root, text="Interest Rate (%):").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+interest_rate_entry = Entry(root, width=20)
+interest_rate_entry.grid(row=3, column=1, padx=10, pady=5)
 
-Label(root,text="Volatility (%):").grid(row=2, column=2, sticky="w", padx=10, pady=5)
-volatility_entry=Entry(root,width=20)
-volatility_entry.grid(row=2, column=2, padx=10, pady=5)
+Label(root, text="Volatility (%):").grid(row=3, column=2, sticky="w", padx=10, pady=5)
+volatility_entry = Entry(root, width=20)
+volatility_entry.grid(row=3, column=3, padx=10, pady=5)
 
-Label(root,text="Time to Maturity (years):").grid(row=2, column=3, sticky="w", padx=10, pady=5)
-time_to_maturity_entry=Entry(root,width=20)
-time_to_maturity_entry.grid(row=2, column=3, padx=10, pady=5)
+Label(root, text="Time to Maturity (years):").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+time_to_maturity_entry = Entry(root, width=20)
+time_to_maturity_entry.grid(row=4, column=1, padx=10, pady=5)
 
-#The sliders for the spot price ranges
-Label(root, text="Spot price start:").grid(row=3, column=0, sticky="w", padx=10, pady=5)
-Spot_start_Slider=Scale(root,from_=0, to=200, orient=HORIZONTAL, length=300)
+# Sliders for spot price ranges
+Label(root, text="Spot Price Start:").grid(row=5, column=0, sticky="w", padx=10, pady=5)
+Spot_start_Slider = Scale(root, from_=0, to=200, orient=HORIZONTAL, length=300)
 Spot_start_Slider.set(50)
-Spot_start_Slider.grid(row=3, column=1, padx=10, pady=5)
+Spot_start_Slider.grid(row=5, column=1, padx=10, pady=5)
 
-Label(root, text="Spot price End:").grid(row=4, column=0, sticky="w", padx=10, pady=5)
-Spot_end_slider=Scale(root, from_=0, to=200, orient=HORIZONTAL,length=300)
+Label(root, text="Spot Price End:").grid(row=6, column=0, sticky="w", padx=10, pady=5)
+Spot_end_slider = Scale(root, from_=0, to=200, orient=HORIZONTAL, length=300)
 Spot_end_slider.set(150)
-Spot_end_slider.grid(row=4, column=1, padx=10, pady=5)
+Spot_end_slider.grid(row=6, column=1, padx=10, pady=5)
 
-Label(root,text="Spot price step:").grid(row=5, column=0, padx=10, pady=5)
-spot_step_slider=Scale(root, from_=1, to=20, orient=HORIZONTAL, length=300)
+Label(root, text="Spot Price Step:").grid(row=7, column=0, sticky="w", padx=10, pady=5)
+spot_step_slider = Scale(root, from_=1, to=20, orient=HORIZONTAL, length=300)
 spot_step_slider.set(5)
-spot_step_slider.grid(row=5, column=1, padx=10, pady=5)
+spot_step_slider.grid(row=7, column=1, padx=10, pady=5)
 
-#The buttons for saving and plotting
-Button(root, text="Plot Payoff diagram", command=lambda: calculate_and_plot(save=False)).grid(row=6, column=0, padx=10, pady=10)
-Button(root, text="Save payoff diagram", command=lambda: calculate_and_plot(save=True)).grid(row=6, column=0, padx=10, pady=10)
+# Buttons for saving and plotting
+Button(root, text="Plot Payoff Diagram", command=lambda: calculate_and_plot(save=False)).grid(row=8, column=0, padx=10, pady=10)
+Button(root, text="Save Payoff Diagram", command=lambda: calculate_and_plot(save=True)).grid(row=8, column=1, padx=10, pady=10)
 
-#Run the application
+# Run the application
 root.mainloop()
