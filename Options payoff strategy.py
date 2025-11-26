@@ -106,6 +106,15 @@ def compute_and_show_bs_price():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
+def Option_Greeks(Delta, Gamma, Theta, Vega, Rho):
+   """
+   Docstring for Option_Greeks
+   :param Delta: Partial derviavtive of option price with respect to underlying asset price.
+   :param Gamma: Partial derivative of Delta with respect to underlying asset price.
+   :param Theta: Partial derivative of option price with respect to time to expiration.
+   :param Vega: Partial derivative of option price with respect to volatility.
+   :param Rho: Partial derivative of option price with respect to interest rate.
+   """
 # Create the application window
 root = Tk()
 root.title("Options Dashboard")
