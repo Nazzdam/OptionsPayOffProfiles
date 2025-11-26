@@ -134,9 +134,11 @@ spot_step_slider = Scale(root, from_=1, to=20, orient=HORIZONTAL, length=300)
 spot_step_slider.set(5)
 spot_step_slider.grid(row=7, column=1, padx=10, pady=5)
 
-# Buttons for saving and plotting
+# Buttons for saving and plotting and the price of the option.
 Button(root, text="Plot Payoff Diagram", command=lambda: calculate_and_plot(save=False)).grid(row=8, column=0, padx=10, pady=10)
 Button(root, text="Save Payoff Diagram", command=lambda: calculate_and_plot(save=True)).grid(row=8, column=1, padx=10, pady=10)
+Button(root, text="Calculate Black-Scholes Price", command=lambda: messagebox.showinfo("Black-Scholes Price", 
+    f"Option Price: {Black_Scholes_price(float(strike_prices_entry.get().split()[0]), 100, float(time_to_maturity_entry.get()), float(interest_rate_entry.get())/100, float(volatility_entry.get())/100, option_type_var.get()):.2f}")).grid(row=8, column=2, padx=10, pady=10)
 
 # Run the application
 root.mainloop()
