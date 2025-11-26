@@ -11,6 +11,7 @@ def calculate_and_plot(save=False):
     try:
         strike_prices = np.array(list(map(float, strike_prices_entry.get().split())))
         premiums = np.array(list(map(float, premiums_entry.get().split())))
+        Spot_price=np.array(list(map(float,spot_price_entry.get().split())))
         
         if len(strike_prices) != len(premiums):
             raise ValueError("Strike prices and premiums must have the same number of entries.")
@@ -93,13 +94,17 @@ root = Tk()
 root.title("Options Dashboard")
 
 # Create labels and inputs
+Label(root,text="Spot Prices (Balck-Scholes Calculation) (space-separated):").grid(row=9, column=0, sticky="w", padx=10, pady=5)
+spot_price_entry = Entry(root, width=40)
+spot_price_entry.grid(row=0, column=1, padx=10, pady=5)
+
 Label(root, text="Strike Prices (space-separated):").grid(row=0, column=0, sticky="w", padx=10, pady=5)
 strike_prices_entry = Entry(root, width=40)
-strike_prices_entry.grid(row=0, column=1, padx=10, pady=5)
+strike_prices_entry.grid(row=1, column=1, padx=10, pady=5)
 
-Label(root, text="Premiums (space-separated):").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+Label(root, text="Premiums (space-separated used for the payoff diagram):").grid(row=1, column=0, sticky="w", padx=10, pady=5)
 premiums_entry = Entry(root, width=40)
-premiums_entry.grid(row=1, column=1, padx=10, pady=5)
+premiums_entry.grid(row=2, column=1, padx=10, pady=5)
 
 Label(root, text="Option Type:").grid(row=2, column=0, sticky="w", padx=10, pady=5)
 option_type_var = StringVar(root)
@@ -117,6 +122,8 @@ volatility_entry.grid(row=3, column=3, padx=10, pady=5)
 Label(root, text="Time to Maturity (years):").grid(row=4, column=0, sticky="w", padx=10, pady=5)
 time_to_maturity_entry = Entry(root, width=20)
 time_to_maturity_entry.grid(row=4, column=1, padx=10, pady=5)
+
+Label(root,text="Payoff diagram section").grid(row=5,column=1,sticky="w",padx=10,pady=5)
 
 # Sliders for spot price ranges
 Label(root, text="Spot Price Start:").grid(row=5, column=0, sticky="w", padx=10, pady=5)
