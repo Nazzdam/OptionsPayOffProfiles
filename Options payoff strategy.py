@@ -144,7 +144,7 @@ OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid
 Label(root, text="Option Type:").grid (row=3), column=1, sticky="w", padx=10, pady=5
 option_type_var = StringVar(root)
 option_type_var.set("Call")
-OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10,pady=
+OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10,pady=5)
                                                                                  
 # Row 4: Rate, vol, T
 Label(root, text="Interest Rate (%):").grid(row=4, column=0, sticky="w", padx=10, pady=5)
