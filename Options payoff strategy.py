@@ -229,6 +229,6 @@ spot_step_slider.grid(row=8, column=1, padx=10, pady=5)
 # Buttons
 Button(root, text="Plot Payoff Diagram", command=lambda: calculate_and_plot(save=False)).grid(row=9, column=0, padx=10, pady=10)
 Button(root, text="Save Payoff Diagram", command=lambda: calculate_and_plot(save=True)).grid(row=9, column=1, padx=10, pady=10)
-Button(root, text="Calculate Black‑Scholes Price", command=compute_and_show_bs_price).grid(row=9, column=2, padx=10, pady=10)
-
+Button(root, text="Calculate Black‑Scholes Price", command=compute_and_show_bs_price,).grid(row=9, column=2, padx=10, pady=10)
+Button(root, text="Calculate greeks", command=calculate_option_greeks).grid(row=9, column=3, padx=10, pady=10)
 root.mainloop()
