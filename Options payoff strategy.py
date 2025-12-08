@@ -186,6 +186,12 @@ option_type_var = StringVar(root)
 option_type_var.set("Call")
 OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
+#Row 3: option type 2
+Label(root, text="Option Type (payoff 2):").grid(row=3, column=4, sticky="w", padx=10, pady=5)
+option_type_var2 = StringVar(root)
+option_type_var2.set("call")
+OptionMenu(root, option_type_var2, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=5, sticky="w", padx=10, pady=5)
+
 # Row 3 column 2: Option Type for Black-Scholes
 Label(root, text="Option Type (Black-Scholes):").grid(row=3, column=2, sticky="w", padx=10, pady=5)
 bs_option_type_var = StringVar(root)
