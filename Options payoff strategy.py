@@ -141,7 +141,7 @@ option_type_var.set("Call")
 OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
 # Row 3 column 1 :Option Type
-Label(root, text="Option Type:").grid (row=3), column=1, sticky="w", padx=10, pady=5
+Label(root, text="Option Type:").grid (row=3), column=0, sticky="w", padx=10, pady=5
 option_type_var = StringVar(root)
 option_type_var.set("Call")
 OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10,pady=5)
