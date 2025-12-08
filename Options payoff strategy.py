@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import Tk, Label, Entry, Button, OptionMenu, StringVar, Scale, HORIZONTAL, filedialog, messagebox
-from numpy import exp, log, sqrt
 from scipy.stats import norm
 
 def calculate_and_plot(save=False):
@@ -20,12 +19,12 @@ def calculate_and_plot(save=False):
         if len(strike_prices) != len(premiums):
             raise ValueError("Strike prices and premiums must have the same count.")
 
-        spot_start = Spot_start_Slider.get()
-        spot_end = Spot_end_slider.get()
+        spot_start = spot_start_slider.get()
+        spot_end = spot_end_slider.get()
         spot_step = spot_step_slider.get()
         if spot_start >= spot_end:
             raise ValueError("Spot start must be less than spot end.")
-        spot_prices = np.arange(spot_start, spot_end + 1e-9, spot_step)
+        spot_prices = np.linspace(spot_start, spot_end, int((spot_end - spot_start) / spot_step) + 1)
 
         option_type = option_type_var.get()
         plt.figure(figsize=(10, 6))
@@ -76,12 +75,12 @@ def Black_Scholes_price(X, S, T, r, Sigma, option_type):
     """
     if S <= 0 or X <= 0 or T <= 0 or Sigma <= 0:
         raise ValueError("S, X, T and Sigma must be positive.")
-    d1 = (log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * sqrt(T))
-    d2 = d1 - Sigma * sqrt(T)
+    d1 = (np.log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * np.sqrt(T))
+    d2 = d1 - Sigma * np.sqrt(T)
     if option_type == "Call":
-        return S * norm.cdf(d1) - X * exp(-r * T) * norm.cdf(d2)
+        return S * norm.cdf(d1) - X * np.exp(-r * T) * norm.cdf(d2)
     elif option_type == "Put":
-        return X * exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        return X * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
     else:
         raise ValueError(f"Unknown Option type: {option_type}")
 
@@ -91,30 +90,77 @@ def compute_and_show_bs_price():
         if not spots:
             raise ValueError("Enter spot price (single value) for Black‑Scholes.")
         S = float(spots.split()[0])
+        if S <= 0:
+            raise ValueError("Spot price must be positive.")
 
         strikes_text = strike_prices_entry.get().strip()
         if not strikes_text:
             raise ValueError("Enter at least one strike price.")
         X = float(strikes_text.split()[0])  # use first strike by default
+        if X <= 0:
+            raise ValueError("Strike price must be positive.")
 
-        T = float(time_to_maturity_entry.get())
-        r = float(interest_rate_entry.get()) / 100.0
-        Sigma = float(volatility_entry.get()) / 100.0
+        T_str = time_to_maturity_entry.get().strip()
+        if not T_str:
+            raise ValueError("Enter time to maturity.")
+        T = float(T_str)
+        if T <= 0:
+            raise ValueError("Time to maturity must be positive.")
+        
+        r_str = interest_rate_entry.get().strip()
+        if not r_str:
+            raise ValueError("Enter interest rate.")
+        r = float(r_str) / 100.0
+        
+        vol_str = volatility_entry.get().strip()
+        if not vol_str:
+            raise ValueError("Enter volatility.")
+        Sigma = float(vol_str) / 100.0
+        if Sigma <= 0:
+            raise ValueError("Volatility must be positive.")
 
-        price = Black_Scholes_price(X, S, T, r, Sigma, option_type_var.get())
+        price = Black_Scholes_price(X, S, T, r, Sigma, bs_option_type_var.get())
         messagebox.showinfo("Black-Scholes Price", f"Option Price: {price:.4f}")
+    except ValueError as e:
+        messagebox.showerror("Input Error", str(e))
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def Option_Greeks(Delta, Gamma, Theta, Vega, Rho):
-   """
-   Docstring for Option_Greeks
-   :param Delta: Partial derviavtive of option price with respect to underlying asset price.
-   :param Gamma: Partial derivative of Delta with respect to underlying asset price.
-   :param Theta: Partial derivative of option price with respect to time to expiration.
-   :param Vega: Partial derivative of option price with respect to volatility.
-   :param Rho: Partial derivative of option price with respect to interest rate.
-   """
+def calculate_option_greeks(S, X, T, r, Sigma, option_type):
+    """
+    Calculate option Greeks.
+    :param S: Spot price
+    :param X: Strike price
+    :param T: Time to maturity
+    :param r: Risk-free rate
+    :param Sigma: Volatility
+    :param option_type: "Call" or "Put"
+    :return: Dictionary with Delta, Gamma, Theta, Vega, Rho
+    """
+    if S <= 0 or X <= 0 or T <= 0 or Sigma <= 0:
+        raise ValueError("S, X, T and Sigma must be positive.")
+    
+    d1 = (np.log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * np.sqrt(T))
+    d2 = d1 - Sigma * np.sqrt(T)
+    
+    greeks = {}
+    
+    if option_type == "Call":
+        greeks["Delta"] = norm.cdf(d1)
+        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(T))
+        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(T)) - r * X * np.exp(-r * T) * norm.cdf(d2)) / 365
+        greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
+        greeks["Rho"] = X * T * np.exp(-r * T) * norm.cdf(d2) / 100
+    elif option_type == "Put":
+        greeks["Delta"] = norm.cdf(d1) - 1
+        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(T))
+        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(T)) + r * X * np.exp(-r * T) * norm.cdf(-d2)) / 365
+        greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
+        greeks["Rho"] = -X * T * np.exp(-r * T) * norm.cdf(-d2) / 100
+    else:
+        raise ValueError(f"Unknown Option type: {option_type}")
+    
+    return greeks
 # Create the application window
 root = Tk()
 root.title("Options Dashboard")
@@ -135,16 +181,16 @@ premiums_entry = Entry(root, width=40)
 premiums_entry.grid(row=2, column=1, padx=10, pady=5)
 
 # Row 3: Option type
-Label(root, text="Option Type:").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+Label(root, text="Option Type (Payoff):").grid(row=3, column=0, sticky="w", padx=10, pady=5)
 option_type_var = StringVar(root)
 option_type_var.set("Call")
 OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
-# Row 3 column 1 :Option Type
-Label(root, text="Option Type:").grid (row=3), column=0, sticky="w", padx=10, pady=5
-option_type_var = StringVar(root)
-option_type_var.set("Call")
-OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10,pady=5)
+# Row 3 column 2: Option Type for Black-Scholes
+Label(root, text="Option Type (Black-Scholes):").grid(row=3, column=2, sticky="w", padx=10, pady=5)
+bs_option_type_var = StringVar(root)
+bs_option_type_var.set("Call")
+OptionMenu(root, bs_option_type_var, "Call", "Put").grid(row=3, column=3, sticky="w", padx=10, pady=5)
                                                                                  
 # Row 4: Rate, vol, T
 Label(root, text="Interest Rate (%):").grid(row=4, column=0, sticky="w", padx=10, pady=5)
@@ -160,14 +206,14 @@ time_to_maturity_entry.grid(row=5, column=1, sticky="w", padx=10, pady=5)
 
 # Payoff sliders
 Label(root, text="Spot Price Start:").grid(row=6, column=0, sticky="w", padx=10, pady=5)
-Spot_start_Slider = Scale(root, from_=0, to=200, orient=HORIZONTAL, length=300)
-Spot_start_Slider.set(50)
-Spot_start_Slider.grid(row=6, column=1, padx=10, pady=5)
+spot_start_slider = Scale(root, from_=0, to=200, orient=HORIZONTAL, length=300)
+spot_start_slider.set(50)
+spot_start_slider.grid(row=6, column=1, padx=10, pady=5)
 
 Label(root, text="Spot Price End:").grid(row=7, column=0, sticky="w", padx=10, pady=5)
-Spot_end_slider = Scale(root, from_=0, to=500, orient=HORIZONTAL, length=300)
-Spot_end_slider.set(150)
-Spot_end_slider.grid(row=7, column=1, padx=10, pady=5)
+spot_end_slider = Scale(root, from_=0, to=500, orient=HORIZONTAL, length=300)
+spot_end_slider.set(150)
+spot_end_slider.grid(row=7, column=1, padx=10, pady=5)
 
 Label(root, text="Spot Price Step:").grid(row=8, column=0, sticky="w", padx=10, pady=5)
 spot_step_slider = Scale(root, from_=1, to=50, orient=HORIZONTAL, length=300)
