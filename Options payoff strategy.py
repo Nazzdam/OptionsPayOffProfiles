@@ -147,20 +147,22 @@ def calculate_option_greeks(S, X, T, r, Sigma, option_type):
     
     if option_type == "Call":
         greeks["Delta"] = norm.cdf(d1)
-        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(T))
-        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(T)) - r * X * np.exp(-r * T) * norm.cdf(d2)) / 365
+        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
+        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) - r * X * np.exp(-r * T) * norm.cdf(d2)) / 365
         greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
         greeks["Rho"] = X * T * np.exp(-r * T) * norm.cdf(d2) / 100
     elif option_type == "Put":
         greeks["Delta"] = norm.cdf(d1) - 1
-        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(T))
-        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(T)) + r * X * np.exp(-r * T) * norm.cdf(-d2)) / 365
+        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
+        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) + r * X * np.exp(-r * T) * norm.cdf(-d2)) / 365
         greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
         greeks["Rho"] = -X * T * np.exp(-r * T) * norm.cdf(-d2) / 100
     else:
         raise ValueError(f"Unknown Option type: {option_type}")
+    messagebox.showinfo("Option Greeks", "\n".join([f"{k}: {v:.4f}" for k, v in greeks.items()]))
     
     return greeks
+
 # Create the application window
 root = Tk()
 root.title("Options Dashboard")
