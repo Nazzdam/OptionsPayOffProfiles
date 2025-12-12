@@ -26,16 +26,26 @@ def calculate_and_plot(save=False):
             raise ValueError("Spot start must be less than spot end.")
         spot_prices = np.linspace(spot_start, spot_end, int((spot_end - spot_start) / spot_step) + 1)
 
-        option_type = option_type_var.get()
-        plt.figure(figsize=(10, 6))
+        option_type1 = option_type_var1.get()
+        option_type2 = option_type_var2.get()
+        #First payoff diagram
         for strike, premium in zip(strike_prices, premiums):
-            payoff = option_Payoff(strike, premium, spot_prices, option_type)
-            plt.plot(spot_prices, payoff, label=f'{option_type} (K={strike}, prem={premium})')
-        plt.title(f'{option_type} Option Payoff Diagram')
+            payoff = option_Payoff(strike, premium, spot_prices, option_type1)
+            plt.plot(spot_prices, payoff, label=f'{option_type1} (K={strike}, prem={premium})')
+        plt.title(f'{option_type1} Option Payoff Diagram')
         plt.xlabel('Spot Price')
         plt.ylabel('Payoff')
         plt.legend()
         plt.grid(True)
+        # Second payoff diagram
+        for strike, premium in zip(strike_prices, premiums):
+            payoff=option_Payoff(strike, premium, spot_prices, option_type2)
+            plt.plot(spot_prices, payoff, label=f'{option_type2} (K={strike}, prem={premium})')
+            plt.title(f'{option_type2} option Payoff diagram')
+            plt.xlabel("Spot price")
+            plt.ylabel("payoff")
+            plt.legend()
+            plt.grid(True)
 
         if save:
             file_path = filedialog.asksaveasfilename(defaultextension=".png",
@@ -126,42 +136,72 @@ def compute_and_show_bs_price():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def calculate_option_greeks(S, X, T, r, Sigma, option_type):
-    """
-    Calculate option Greeks.
-    :param S: Spot price
-    :param X: Strike price
-    :param T: Time to maturity
-    :param r: Risk-free rate
-    :param Sigma: Volatility
-    :param option_type: "Call" or "Put"
-    :return: Dictionary with Delta, Gamma, Theta, Vega, Rho
-    """
-    if S <= 0 or X <= 0 or T <= 0 or Sigma <= 0:
-        raise ValueError("S, X, T and Sigma must be positive.")
-    
-    d1 = (np.log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * np.sqrt(T))
-    d2 = d1 - Sigma * np.sqrt(T)
-    
-    greeks = {}
-    
-    if option_type == "Call":
-        greeks["Delta"] = norm.cdf(d1)
-        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
-        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) - r * X * np.exp(-r * T) * norm.cdf(d2)) / 365
-        greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
-        greeks["Rho"] = X * T * np.exp(-r * T) * norm.cdf(d2) / 100
-    elif option_type == "Put":
-        greeks["Delta"] = norm.cdf(d1) - 1
-        greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
-        greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) + r * X * np.exp(-r * T) * norm.cdf(-d2)) / 365
-        greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
-        greeks["Rho"] = -X * T * np.exp(-r * T) * norm.cdf(-d2) / 100
-    else:
-        raise ValueError(f"Unknown Option type: {option_type}")
-    messagebox.showinfo("Option Greeks", "\n".join([f"{k}: {v:.4f}" for k, v in greeks.items()]))
-    
-    return greeks
+def calculate_option_greeks():
+    try:
+        spots = spot_price_entry.get().strip()
+        if not spots:
+            raise ValueError("Enter spot price (single value) for Greeks.")
+        S = float(spots.split()[0])
+        if S <= 0:
+            raise ValueError("Spot price must be positive.")
+
+        strikes_text = strike_prices_entry.get().strip()
+        if not strikes_text:
+            raise ValueError("Enter at least one strike price.")
+        X = float(strikes_text.split()[0])  # use first strike by default
+        if X <= 0:
+            raise ValueError("Strike price must be positive.")
+
+        T_str = time_to_maturity_entry.get().strip()
+        if not T_str:
+            raise ValueError("Enter time to maturity.")
+        T = float(T_str)
+        if T <= 0:
+            raise ValueError("Time to maturity must be positive.")
+        
+        r_str = interest_rate_entry.get().strip()
+        if not r_str:
+            raise ValueError("Enter interest rate.")
+        r = float(r_str) / 100.0
+        
+        vol_str = volatility_entry.get().strip()
+        if not vol_str:
+            raise ValueError("Enter volatility.")
+        Sigma = float(vol_str) / 100.0
+        if Sigma <= 0:
+            raise ValueError("Volatility must be positive.")
+
+        option_type = bs_option_type_var.get()  # Use the Black-Scholes option type dropdown
+
+        if S <= 0 or X <= 0 or T <= 0 or Sigma <= 0:
+            raise ValueError("S, X, T and Sigma must be positive.")
+        
+        d1 = (np.log(S / X) + (r + 0.5 * Sigma**2) * T) / (Sigma * np.sqrt(T))
+        d2 = d1 - Sigma * np.sqrt(T)
+        
+        greeks = {}
+        
+        if option_type == "Call":
+            greeks["Delta"] = norm.cdf(d1)
+            greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
+            greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) - r * X * np.exp(-r * T) * norm.cdf(d2)) / 365
+            greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
+            greeks["Rho"] = X * T * np.exp(-r * T) * norm.cdf(d2) / 100
+        elif option_type == "Put":
+            greeks["Delta"] = norm.cdf(d1) - 1
+            greeks["Gamma"] = norm.pdf(d1) / (S * Sigma * np.sqrt(2*np.pi*T))
+            greeks["Theta"] = (-S * norm.pdf(d1) * Sigma / (2 * np.sqrt(2*np.pi*T)) + r * X * np.exp(-r * T) * norm.cdf(-d2)) / 365
+            greeks["Vega"] = S * norm.pdf(d1) * np.sqrt(T) / 100
+            greeks["Rho"] = -X * T * np.exp(-r * T) * norm.cdf(-d2) / 100
+        else:
+            raise ValueError(f"Unknown Option type: {option_type}")
+        messagebox.showinfo("Option Greeks", "\n".join([f"{k}: {v:.4f}" for k, v in greeks.items()]))
+        
+        return greeks
+    except ValueError as e:
+        messagebox.showerror("Input Error", str(e))
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
 # Create the application window
 root = Tk()
@@ -183,16 +223,16 @@ premiums_entry = Entry(root, width=40)
 premiums_entry.grid(row=2, column=1, padx=10, pady=5)
 
 # Row 3: Option type
-Label(root, text="Option Type (Payoff):").grid(row=3, column=0, sticky="w", padx=10, pady=5)
-option_type_var = StringVar(root)
-option_type_var.set("Call")
-OptionMenu(root, option_type_var, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=1, sticky="w", padx=10, pady=5)
+Label(root, text="Option Type (Payoff 1):").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+option_type_var1 = StringVar(root)
+option_type_var1.set("Call")
+OptionMenu(root, option_type_var1, "Call", "Short Call").grid(row=3, column=1, sticky="w", padx=10, pady=5)
 
-#Row 3: option type 2
-Label(root, text="Option Type (payoff 2):").grid(row=3, column=4, sticky="w", padx=10, pady=5)
+# Row 3: Option type 2
+Label(root, text="Option Type (Payoff 2):").grid(row=3, column=4, sticky="w", padx=10, pady=5)
 option_type_var2 = StringVar(root)
-option_type_var2.set("call")
-OptionMenu(root, option_type_var2, "Call", "Put", "Short Call", "Short Put").grid(row=3, column=5, sticky="w", padx=10, pady=5)
+option_type_var2.set("Put")
+OptionMenu(root, option_type_var2, "Put", "Short Put").grid(row=3, column=5, sticky="w", padx=10, pady=5)
 
 # Row 3 column 2: Option Type for Black-Scholes
 Label(root, text="Option Type (Black-Scholes):").grid(row=3, column=2, sticky="w", padx=10, pady=5)
